@@ -49,12 +49,13 @@
     width: 100%;
     aspect-ratio: 1 / 1;
     text-align: center;
-    font-size: 18px;
+    font-size: 20px;
     text-transform: uppercase;
     border: 2px solid #fff3a0;
     border-radius: 6px;
     box-sizing: border-box;
     background-color: #ffffff;
+    padding: 0;
   }
 
   .highlight {
@@ -102,7 +103,7 @@
     margin-bottom: 20px;
   }
 
-  /* Confetti styles */
+  /* Confetti */
   .confetti {
     pointer-events: none;
     position: fixed;
@@ -186,12 +187,14 @@ const inputs = Array.from(document.querySelectorAll("input[data-answer]"));
 
 let solved = false;
 
+// Show game after fake loading
 setTimeout(() => {
   loading.style.display = "none";
   game.style.display = "block";
   inputs[0].focus();
 }, 2000);
 
+// Create confetti
 function createConfetti() {
   for(let i=0;i<100;i++){
     const c = document.createElement("div");
@@ -201,7 +204,7 @@ function createConfetti() {
     c.style.animationDuration = (2+Math.random()*2) + "s";
     confettiContainer.appendChild(c);
   }
-  // Remove confetti after 3s
+  // Remove after 3s
   setTimeout(() => { confettiContainer.innerHTML = ''; }, 3000);
 }
 
@@ -228,12 +231,13 @@ inputs.forEach((input, index) => {
   });
 });
 
+// Check puzzle completion
 function checkSolved() {
   if (solved) return;
   const complete = inputs.every(input => input.value === input.dataset.answer);
   if (complete) {
     solved = true;
-    // pause 2s to admire the completed puzzle
+    // Show crossword for 2s, then show button + confetti
     setTimeout(() => {
       revealButton.style.display = "block";
       createConfetti();
@@ -241,6 +245,7 @@ function checkSolved() {
   }
 }
 
+// Show reveal gift
 revealButton.addEventListener("click", () => {
   reveal.style.display = "flex";
   revealButton.style.display = "none";
