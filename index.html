@@ -154,7 +154,7 @@
     <p><strong>5.</strong> Brazilian street skewers</p>
     <p><strong>6.</strong> Portuguese word for cheese</p>
     <p><strong>7.</strong> Red spice made from annatto</p>
-    <p><strong>8.</strong> Palm oil used in Brazilian cooking (DENDÊ)</p>
+    <p><strong>8.</strong> Palm oil used in Brazilian cooking</p>
   </div>
 </div>
 
@@ -179,27 +179,28 @@
   setTimeout(() => {
     loading.style.display = "none";
     game.style.display = "block";
+    inputs[0].focus();
   }, 2000);
 
-  inputs.forEach(input => {
+  inputs.forEach((input, index) => {
     input.maxLength = 1;
     input.addEventListener("input", () => {
       input.value = input.value.toUpperCase();
+      // Auto-focus next input if exists
+      let nextInput = inputs[index + 1];
+      if (nextInput) nextInput.focus();
       setTimeout(checkSolved, 50);
     });
   });
 
   function checkSolved() {
     if (solved) return;
-
     const complete = inputs.every(
       input => input.value === input.dataset.answer
     );
-
     if (complete) {
       solved = true;
       popup.style.display = "flex";
-
       setTimeout(() => {
         popup.style.display = "none";
         reveal.style.display = "flex";
