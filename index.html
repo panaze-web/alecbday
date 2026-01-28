@@ -99,11 +99,123 @@
     margin-bottom: 20px;
   }
 
-  .reveal h2 {
-    margin-bottom: 20px;
-    font-weight: normal;
-  }
-
   .restart {
     background: #ffdf00;
-    color: #1
+    color: #111;
+    border: none;
+    padding: 10px 16px;
+    border-radius: 20px;
+    font-size: 14px;
+    cursor: pointer;
+  }
+</style>
+</head>
+
+<body>
+
+<div class="loading" id="loading">
+  loading birthday puzzle…
+</div>
+
+<div class="container" id="game">
+  <h1>Birthday Crossword</h1>
+
+  <div class="grid">
+    <!-- BRASILIA -->
+    <input data-answer="B" class="highlight"><input data-answer="R"><input data-answer="A"><input data-answer="S"><input data-answer="I"><input data-answer="L"><input data-answer="I"><input data-answer="A"><span></span><span></span>
+
+    <!-- ACARAJE -->
+    <span></span><input data-answer="A" class="highlight"><input data-answer="C"><input data-answer="A"><input data-answer="R"><input data-answer="A"><input data-answer="J"><input data-answer="E"><span></span><span></span>
+
+    <!-- RIO -->
+    <span></span><span></span><input data-answer="R" class="highlight"><input data-answer="I"><input data-answer="O"><span></span><span></span><span></span><span></span><span></span>
+
+    <!-- BRAZIL -->
+    <input data-answer="B" class="highlight"><input data-answer="R"><input data-answer="A"><input data-answer="Z"><input data-answer="I"><input data-answer="L"><span></span><span></span><span></span><span></span>
+
+    <!-- ESPETINHO -->
+    <input data-answer="E" class="highlight"><input data-answer="S"><input data-answer="P"><input data-answer="E"><input data-answer="T"><input data-answer="I"><input data-answer="N"><input data-answer="H"><input data-answer="O"><span></span>
+
+    <!-- QUEIJO -->
+    <input data-answer="Q" class="highlight"><input data-answer="U"><input data-answer="E"><input data-answer="I"><input data-answer="J"><input data-answer="O"><span></span><span></span><span></span><span></span>
+
+    <!-- URUCUM -->
+    <input data-answer="U" class="highlight"><input data-answer="R"><input data-answer="U"><input data-answer="C"><input data-answer="U"><input data-answer="M"><span></span><span></span><span></span><span></span>
+
+    <!-- DENDE -->
+    <input data-answer="D"><input data-answer="E"><input data-answer="N"><input data-answer="D"><input data-answer="E" class="highlight"><span></span><span></span><span></span><span></span><span></span>
+  </div>
+
+  <div class="clues">
+    <p><strong>1.</strong> Capital of Brazil</p>
+    <p><strong>2.</strong> Deep-fried Afro-Brazilian street food</p>
+    <p><strong>3.</strong> City famous for Carnival</p>
+    <p><strong>4.</strong> Country you’ll be visiting very soon</p>
+    <p><strong>5.</strong> Brazilian street skewers</p>
+    <p><strong>6.</strong> Portuguese word for cheese</p>
+    <p><strong>7.</strong> Red spice made from annatto</p>
+    <p><strong>8.</strong> Palm oil used in Brazilian cooking (DENDÊ)</p>
+  </div>
+</div>
+
+<div class="popup" id="popup">BARBEQUE</div>
+
+<div class="reveal" id="reveal">
+  <img src="https://images.unsplash.com/photo-1555939594-58d7cb561ad1" alt="Brazilian barbecue">
+  <h2>he will cook.<br>let him cook.</h2>
+  <button class="restart" id="restart">restart puzzle</button>
+</div>
+
+<script>
+  const loading = document.getElementById("loading");
+  const game = document.getElementById("game");
+  const popup = document.getElementById("popup");
+  const reveal = document.getElementById("reveal");
+  const restartBtn = document.getElementById("restart");
+  const inputs = Array.from(document.querySelectorAll("input[data-answer]"));
+
+  let solved = false;
+
+  setTimeout(() => {
+    loading.style.display = "none";
+    game.style.display = "block";
+  }, 2000);
+
+  inputs.forEach(input => {
+    input.maxLength = 1;
+    input.addEventListener("input", () => {
+      input.value = input.value.toUpperCase();
+      setTimeout(checkSolved, 50);
+    });
+  });
+
+  function checkSolved() {
+    if (solved) return;
+
+    const complete = inputs.every(
+      input => input.value === input.dataset.answer
+    );
+
+    if (complete) {
+      solved = true;
+      popup.style.display = "flex";
+
+      setTimeout(() => {
+        popup.style.display = "none";
+        reveal.style.display = "flex";
+      }, 2500);
+    }
+  }
+
+  restartBtn.addEventListener("click", () => {
+    inputs.forEach(input => input.value = "");
+    reveal.style.display = "none";
+    popup.style.display = "none";
+    solved = false;
+    game.style.display = "block";
+    inputs[0].focus();
+  });
+</script>
+
+</body>
+</html>
