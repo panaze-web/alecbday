@@ -195,14 +195,14 @@ function checkSolved() {
   const complete = inputs.every(input => input.value === input.dataset.answer);
   if (complete) {
     solved = true;
-    // Wait 2s to admire completed puzzle, then show button
+    // Wait 2s to admire completed puzzle, then show Reveal Gift button
     setTimeout(() => {
       revealButton.style.display = "block";
     }, 2000);
   }
 }
 
-// Show BBQ gift directly when button clicked
+// Show BBQ gift when button clicked
 revealButton.addEventListener("click", () => {
   reveal.style.display = "flex";
   revealButton.style.display = "none";
