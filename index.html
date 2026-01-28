@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
 <title>Birthday Crossword</title>
 
 <style>
@@ -11,6 +11,7 @@
     font-family: -apple-system, BlinkMacSystemFont, sans-serif;
     background: #1f7a3f;
     color: #111;
+    overflow-x: hidden;
   }
 
   h1 {
@@ -40,7 +41,7 @@
   .grid {
     display: grid;
     grid-template-columns: repeat(10, 1fr);
-    gap: 4px;
+    gap: 6px;
     margin: 16px 0;
   }
 
@@ -48,10 +49,12 @@
     width: 100%;
     aspect-ratio: 1 / 1;
     text-align: center;
-    font-size: 16px;
+    font-size: 18px;
     text-transform: uppercase;
-    border: 1px solid #999;
-    border-radius: 4px;
+    border: 2px solid #fff3a0;
+    border-radius: 6px;
+    box-sizing: border-box;
+    background-color: #ffffff;
   }
 
   .highlight {
@@ -64,19 +67,20 @@
     border-radius: 8px;
     padding: 12px;
     font-size: 14px;
+    margin-bottom: 16px;
   }
 
-  .popup {
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.85);
-    color: white;
+  #revealButton {
     display: none;
-    align-items: center;
-    justify-content: center;
-    font-size: 42px;
-    letter-spacing: 6px;
-    z-index: 10;
+    margin: 20px auto;
+    padding: 12px 24px;
+    border-radius: 25px;
+    border: none;
+    background: #ffdf00;
+    color: #111;
+    font-size: 16px;
+    cursor: pointer;
+    font-weight: bold;
   }
 
   .reveal {
@@ -90,7 +94,6 @@
     flex-direction: column;
     text-align: center;
     padding: 20px;
-    z-index: 11;
   }
 
   .reveal img {
@@ -99,14 +102,28 @@
     margin-bottom: 20px;
   }
 
-  .restart {
-    background: #ffdf00;
-    color: #111;
-    border: none;
-    padding: 10px 16px;
-    border-radius: 20px;
-    font-size: 14px;
-    cursor: pointer;
+  /* Confetti styles */
+  .confetti {
+    pointer-events: none;
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    z-index: 9999;
+  }
+
+  .confetti-piece {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    opacity: 0.9;
+    animation: fall linear infinite;
+  }
+
+  @keyframes fall {
+    0% { transform: translateY(-10px) rotate(0deg); }
+    100% { transform: translateY(100vh) rotate(360deg); }
   }
 </style>
 </head>
@@ -123,25 +140,18 @@
   <div class="grid">
     <!-- BRASILIA -->
     <input data-answer="B" class="highlight"><input data-answer="R"><input data-answer="A"><input data-answer="S"><input data-answer="I"><input data-answer="L"><input data-answer="I"><input data-answer="A"><span></span><span></span>
-
     <!-- ACARAJE -->
     <span></span><input data-answer="A" class="highlight"><input data-answer="C"><input data-answer="A"><input data-answer="R"><input data-answer="A"><input data-answer="J"><input data-answer="E"><span></span><span></span>
-
     <!-- RIO -->
     <span></span><span></span><input data-answer="R" class="highlight"><input data-answer="I"><input data-answer="O"><span></span><span></span><span></span><span></span><span></span>
-
     <!-- BRAZIL -->
     <input data-answer="B" class="highlight"><input data-answer="R"><input data-answer="A"><input data-answer="Z"><input data-answer="I"><input data-answer="L"><span></span><span></span><span></span><span></span>
-
     <!-- ESPETINHO -->
     <input data-answer="E" class="highlight"><input data-answer="S"><input data-answer="P"><input data-answer="E"><input data-answer="T"><input data-answer="I"><input data-answer="N"><input data-answer="H"><input data-answer="O"><span></span>
-
     <!-- QUEIJO -->
     <input data-answer="Q" class="highlight"><input data-answer="U"><input data-answer="E"><input data-answer="I"><input data-answer="J"><input data-answer="O"><span></span><span></span><span></span><span></span>
-
     <!-- URUCUM -->
     <input data-answer="U" class="highlight"><input data-answer="R"><input data-answer="U"><input data-answer="C"><input data-answer="U"><input data-answer="M"><span></span><span></span><span></span><span></span>
-
     <!-- DENDE -->
     <input data-answer="D"><input data-answer="E"><input data-answer="N"><input data-answer="D"><input data-answer="E" class="highlight"><span></span><span></span><span></span><span></span><span></span>
   </div>
@@ -156,66 +166,85 @@
     <p><strong>7.</strong> Red spice made from annatto</p>
     <p><strong>8.</strong> Palm oil used in Brazilian cooking</p>
   </div>
+
+  <button id="revealButton">Reveal Gift</button>
 </div>
 
-<div class="popup" id="popup">BARBEQUE</div>
-
 <div class="reveal" id="reveal">
+  <div class="confetti" id="confetti"></div>
   <img src="https://images.unsplash.com/photo-1555939594-58d7cb561ad1" alt="Brazilian barbecue">
   <h2>he will cook.<br>let him cook.</h2>
-  <button class="restart" id="restart">restart puzzle</button>
 </div>
 
 <script>
-  const loading = document.getElementById("loading");
-  const game = document.getElementById("game");
-  const popup = document.getElementById("popup");
-  const reveal = document.getElementById("reveal");
-  const restartBtn = document.getElementById("restart");
-  const inputs = Array.from(document.querySelectorAll("input[data-answer]"));
+const loading = document.getElementById("loading");
+const game = document.getElementById("game");
+const revealButton = document.getElementById("revealButton");
+const reveal = document.getElementById("reveal");
+const confettiContainer = document.getElementById("confetti");
+const inputs = Array.from(document.querySelectorAll("input[data-answer]"));
 
-  let solved = false;
+let solved = false;
 
-  setTimeout(() => {
-    loading.style.display = "none";
-    game.style.display = "block";
-    inputs[0].focus();
-  }, 2000);
+setTimeout(() => {
+  loading.style.display = "none";
+  game.style.display = "block";
+  inputs[0].focus();
+}, 2000);
 
-  inputs.forEach((input, index) => {
-    input.maxLength = 1;
-    input.addEventListener("input", () => {
-      input.value = input.value.toUpperCase();
-      // Auto-focus next input if exists
-      let nextInput = inputs[index + 1];
-      if (nextInput) nextInput.focus();
-      setTimeout(checkSolved, 50);
-    });
-  });
-
-  function checkSolved() {
-    if (solved) return;
-    const complete = inputs.every(
-      input => input.value === input.dataset.answer
-    );
-    if (complete) {
-      solved = true;
-      popup.style.display = "flex";
-      setTimeout(() => {
-        popup.style.display = "none";
-        reveal.style.display = "flex";
-      }, 2500);
-    }
+function createConfetti() {
+  for(let i=0;i<100;i++){
+    const c = document.createElement("div");
+    c.classList.add("confetti-piece");
+    c.style.left = Math.random()*100 + "vw";
+    c.style.backgroundColor = `hsl(${Math.random()*360},100%,50%)`;
+    c.style.animationDuration = (2+Math.random()*2) + "s";
+    confettiContainer.appendChild(c);
   }
+  // Remove confetti after 3s
+  setTimeout(() => { confettiContainer.innerHTML = ''; }, 3000);
+}
 
-  restartBtn.addEventListener("click", () => {
-    inputs.forEach(input => input.value = "");
-    reveal.style.display = "none";
-    popup.style.display = "none";
-    solved = false;
-    game.style.display = "block";
-    inputs[0].focus();
+inputs.forEach((input, index) => {
+  input.maxLength = 1;
+
+  input.addEventListener("input", () => {
+    input.value = input.value.toUpperCase();
+    const nextInput = inputs[index + 1];
+    if(nextInput) nextInput.focus();
+    else input.blur(); // hide keyboard on last input
+    setTimeout(checkSolved, 150);
   });
+
+  input.addEventListener("keydown", (e) => {
+    if (e.key === "Backspace" && !input.value) {
+      const prevInput = inputs[index - 1];
+      if(prevInput) {
+        prevInput.focus();
+        prevInput.value = "";
+        e.preventDefault();
+      }
+    }
+  });
+});
+
+function checkSolved() {
+  if (solved) return;
+  const complete = inputs.every(input => input.value === input.dataset.answer);
+  if (complete) {
+    solved = true;
+    // pause 2s to admire the completed puzzle
+    setTimeout(() => {
+      revealButton.style.display = "block";
+      createConfetti();
+    }, 2000);
+  }
+}
+
+revealButton.addEventListener("click", () => {
+  reveal.style.display = "flex";
+  revealButton.style.display = "none";
+});
 </script>
 
 </body>
